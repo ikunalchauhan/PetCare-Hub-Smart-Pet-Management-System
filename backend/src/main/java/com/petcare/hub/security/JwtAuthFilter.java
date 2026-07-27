@@ -9,7 +9,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.security.web.util.matcher.AntPathMatcher;
+import org.springframework.security.web.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -21,14 +22,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
-    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-    private static final List<String> PUBLIC_PATHS = List.of(
-            "/api/auth/**",
-            "/v3/api-docs/**",
-            "/swagger-ui/**",
-            "/swagger-ui.html",
-            "/uploads/**"
+    /**
+     * Requests matching any of these are skipped by this filter entirely
+     * (login/register, API docs, uploaded files). Built with
+     * PathPatternRequestMatcher — the matching strategy Spring Security 6.3+
+     * recommends in place of the legacy AntPathMatcher/AntPathRequestMatcher,
+     * since it shares the same PathPattern engine Spring MVC uses for routing
+     * and avoids the matching inconsistencies Ant-style matching could allow.
+     */
+    private static final List<RequestMatcher> PUBLIC_MATCHERS = List.of(
+            PathPatternRequestMatcher.withDefaults().matcher("/api/auth/**"),
+            PathPatternRequestMatcher.withDefaults().matcher("/v3/api-docs/**"),
+            PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui/**"),
+            PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui.html"),
+            PathPatternRequestMatcher.withDefaults().matcher("/uploads/**")
     );
 
     public JwtAuthFilter(JwtUtil jwtUtil, CustomUserDetailsService userDetailsService) {
@@ -38,8 +46,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        String path = request.getServletPath();
-        return PUBLIC_PATHS.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
+        return PUBLIC_MATCHERS.stream().anyMatch(matcher -> matcher.matches(request));
     }
 
     @Override
