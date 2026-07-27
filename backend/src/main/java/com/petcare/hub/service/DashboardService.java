@@ -53,8 +53,10 @@ public class DashboardService {
                 .filter(v -> v.getNextDueDate().isBefore(today))
                 .collect(Collectors.toList());
 
-        List<Appointment> upcomingAppointments = appointmentRepository.findByOwnerIdOrderByAppointmentDateAsc(ownerId).stream()
+        List<Appointment> allUpcomingAppointments = appointmentRepository.findByOwnerIdOrderByAppointmentDateAsc(ownerId).stream()
                 .filter(a -> a.getAppointmentDate().isAfter(now) && "SCHEDULED".equals(a.getStatus()))
+                .collect(Collectors.toList());
+        List<Appointment> upcomingAppointments = allUpcomingAppointments.stream()
                 .limit(10)
                 .collect(Collectors.toList());
 
@@ -85,7 +87,7 @@ public class DashboardService {
         summary.put("totalPets", totalPets);
         summary.put("vaccinationsDueSoon", dueSoon.size());
         summary.put("vaccinationsOverdue", overdue.size());
-        summary.put("upcomingAppointmentsCount", upcomingAppointments.size());
+        summary.put("upcomingAppointmentsCount", allUpcomingAppointments.size());
         summary.put("activeMedicinesCount", activeMedicines.size());
         summary.put("totalExpenses", totalExpenses);
         summary.put("thisMonthExpenses", thisMonthExpenses);

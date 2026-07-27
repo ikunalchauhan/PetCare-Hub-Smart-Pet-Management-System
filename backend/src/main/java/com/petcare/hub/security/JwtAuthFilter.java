@@ -24,7 +24,8 @@ import java.io.IOException;
  * {@code authorizeHttpRequests(...)} rules, which are Spring Security's own
  * maintained, version-correct mechanism for deciding which paths are public
  * vs. protected. Keeping path matching in exactly one place avoids the two
- * engines ever disagreeing about what a given path pattern means.
+ * engines ever disagreeing about what a given path pattern means — a class
+ * of bug Spring Security's own advisories have warned about.
  * <p>
  * Running on every request is safe: with no/invalid token the filter simply
  * leaves the request unauthenticated and lets it continue — public routes
@@ -44,8 +45,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
-                                    @NonNull HttpServletResponse response,
-                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+                                     @NonNull HttpServletResponse response,
+                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
