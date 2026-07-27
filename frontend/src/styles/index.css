@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply font-body text-slate-800 antialiased;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(23, 179, 127, 0.16), transparent 40%),
+    radial-gradient(circle at 88% 18%, rgba(50, 142, 255, 0.14), transparent 45%),
+    radial-gradient(circle at 50% 100%, rgba(200, 168, 108, 0.12), transparent 50%),
+    #f5f8f5;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-display;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(12, 146, 104, 0.35);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(12, 146, 104, 0.55);
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/60 backdrop-blur-lg border border-white/70 shadow-glass rounded-2xl;
+  }
+
+  .glass-panel {
+    @apply bg-white/50 backdrop-blur-xl border border-white/60 shadow-glass-lg rounded-3xl;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-600 to-primary-500
+      px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-primary-600/20 transition-all
+      hover:shadow-lg hover:shadow-primary-600/30 hover:-translate-y-0.5 active:translate-y-0
+      disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-white/70 backdrop-blur border border-slate-200
+      px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-white hover:-translate-y-0.5
+      active:translate-y-0 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-red-50 border border-red-200
+      px-4 py-2.5 text-sm font-semibold text-red-600 transition-all hover:bg-red-100
+      disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .input-field {
+    @apply w-full rounded-xl border border-slate-200 bg-white/80 px-3.5 py-2.5 text-sm text-slate-800
+      placeholder:text-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-4 focus:ring-primary-100;
+  }
+
+  .input-label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500;
+  }
+
+  .input-error {
+    @apply mt-1 text-xs font-medium text-red-500;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+
+  .skeleton {
+    @apply animate-pulse rounded-xl bg-slate-200/70;
+  }
+}

@@ -1,0 +1,487 @@
+{
+  "info": {
+    "name": "PetCare Hub API",
+    "description": "Complete Postman collection for PetCare Hub – Smart Pet Management System. Import this alongside the 'PetCare Hub Local' environment. Run 'Login' first (or 'Register') to auto-populate the {{token}} variable used by every other request.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "petId", "value": "", "type": "string" },
+    { "key": "vaccinationId", "value": "", "type": "string" },
+    { "key": "medicalRecordId", "value": "", "type": "string" },
+    { "key": "medicineId", "value": "", "type": "string" },
+    { "key": "appointmentId", "value": "", "type": "string" },
+    { "key": "expenseId", "value": "", "type": "string" },
+    { "key": "documentId", "value": "", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Jane Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"password\": \"Password123\",\n  \"phone\": \"+1 555 123 4567\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 201) {",
+                "  const data = pm.response.json();",
+                "  pm.collectionVariables.set('token', data.token);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@petcarehub.dev\",\n  \"password\": \"Demo@1234\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 200) {",
+                "  const data = pm.response.json();",
+                "  pm.collectionVariables.set('token', data.token);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Get Current User",
+          "request": { "method": "GET", "url": "{{baseUrl}}/auth/me" }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/me",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Alex Morgan\",\n  \"phone\": \"+1 555 234 7890\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pets",
+      "item": [
+        {
+          "name": "List My Pets",
+          "request": { "method": "GET", "url": "{{baseUrl}}/pets" }
+        },
+        {
+          "name": "Create Pet",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/pets",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Buddy\",\n  \"species\": \"Dog\",\n  \"breed\": \"Golden Retriever\",\n  \"gender\": \"Male\",\n  \"dateOfBirth\": \"2022-05-14\",\n  \"weightKg\": 28.5,\n  \"color\": \"Golden\",\n  \"microchipId\": \"985121054327618\",\n  \"notes\": \"Loves the park.\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 201) {",
+                "  const data = pm.response.json();",
+                "  pm.collectionVariables.set('petId', data.id);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Get Pet By Id",
+          "request": { "method": "GET", "url": "{{baseUrl}}/pets/{{petId}}" }
+        },
+        {
+          "name": "Update Pet",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/pets/{{petId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Buddy\",\n  \"species\": \"Dog\",\n  \"breed\": \"Golden Retriever\",\n  \"gender\": \"Male\",\n  \"dateOfBirth\": \"2022-05-14\",\n  \"weightKg\": 29.0,\n  \"color\": \"Golden\",\n  \"microchipId\": \"985121054327618\",\n  \"notes\": \"Updated weight after vet visit.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Pet",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/pets/{{petId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Vaccinations",
+      "item": [
+        {
+          "name": "List Vaccinations For Pet",
+          "request": { "method": "GET", "url": "{{baseUrl}}/pets/{{petId}}/vaccinations" }
+        },
+        {
+          "name": "List All Vaccinations",
+          "request": { "method": "GET", "url": "{{baseUrl}}/vaccinations" }
+        },
+        {
+          "name": "Vaccination Reminders (next 30 days)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/vaccinations/reminders?daysAhead=30" }
+        },
+        {
+          "name": "Add Vaccination",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/pets/{{petId}}/vaccinations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vaccineName\": \"Rabies\",\n  \"dateAdministered\": \"2026-02-10\",\n  \"nextDueDate\": \"2027-02-10\",\n  \"veterinarianName\": \"Dr. Emily Carter\",\n  \"clinicName\": \"Sunrise Animal Clinic\",\n  \"batchNumber\": \"RB-2291\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 201) {",
+                "  const data = pm.response.json();",
+                "  pm.collectionVariables.set('vaccinationId', data.id);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Update Vaccination",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/vaccinations/{{vaccinationId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vaccineName\": \"Rabies\",\n  \"dateAdministered\": \"2026-02-10\",\n  \"nextDueDate\": \"2027-03-10\",\n  \"veterinarianName\": \"Dr. Emily Carter\",\n  \"clinicName\": \"Sunrise Animal Clinic\",\n  \"batchNumber\": \"RB-2291\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Vaccination",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/vaccinations/{{vaccinationId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Medical Records",
+      "item": [
+        {
+          "name": "List Medical Records For Pet",
+          "request": { "method": "GET", "url": "{{baseUrl}}/pets/{{petId}}/medical-records" }
+        },
+        {
+          "name": "List All Medical Records",
+          "request": { "method": "GET", "url": "{{baseUrl}}/medical-records" }
+        },
+        {
+          "name": "Add Medical Record",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/pets/{{petId}}/medical-records",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visitDate\": \"2026-06-01\",\n  \"diagnosis\": \"Mild ear infection\",\n  \"treatment\": \"Ear drops for 10 days\",\n  \"veterinarianName\": \"Dr. Emily Carter\",\n  \"clinicName\": \"Sunrise Animal Clinic\",\n  \"notes\": \"Follow-up not required.\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 201) {",
+                "  const data = pm.response.json();",
+                "  pm.collectionVariables.set('medicalRecordId', data.id);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Update Medical Record",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/medical-records/{{medicalRecordId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visitDate\": \"2026-06-01\",\n  \"diagnosis\": \"Mild ear infection\",\n  \"treatment\": \"Ear drops for 14 days\",\n  \"veterinarianName\": \"Dr. Emily Carter\",\n  \"clinicName\": \"Sunrise Animal Clinic\",\n  \"notes\": \"Extended treatment course.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Medical Record",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/medical-records/{{medicalRecordId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Medicines",
+      "item": [
+        {
+          "name": "List Medicines For Pet",
+          "request": { "method": "GET", "url": "{{baseUrl}}/pets/{{petId}}/medicines" }
+        },
+        {
+          "name": "List All Medicines",
+          "request": { "method": "GET", "url": "{{baseUrl}}/medicines" }
+        },
+        {
+          "name": "List Active Medicines",
+          "request": { "method": "GET", "url": "{{baseUrl}}/medicines/active" }
+        },
+        {
+          "name": "Add Medicine",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/pets/{{petId}}/medicines",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Heartgard Plus\",\n  \"dosage\": \"1 chewable\",\n  \"frequency\": \"Once monthly\",\n  \"startDate\": \"2026-01-01\",\n  \"prescribedBy\": \"Dr. Emily Carter\",\n  \"instructions\": \"Give with food\",\n  \"active\": true\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 201) {",
+                "  const data = pm.response.json();",
+                "  pm.collectionVariables.set('medicineId', data.id);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Update Medicine",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/medicines/{{medicineId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Heartgard Plus\",\n  \"dosage\": \"1 chewable\",\n  \"frequency\": \"Once monthly\",\n  \"startDate\": \"2026-01-01\",\n  \"endDate\": \"2026-12-31\",\n  \"prescribedBy\": \"Dr. Emily Carter\",\n  \"instructions\": \"Give with food\",\n  \"active\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Medicine",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/medicines/{{medicineId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Appointments",
+      "item": [
+        {
+          "name": "List Appointments For Pet",
+          "request": { "method": "GET", "url": "{{baseUrl}}/pets/{{petId}}/appointments" }
+        },
+        {
+          "name": "List All Appointments",
+          "request": { "method": "GET", "url": "{{baseUrl}}/appointments" }
+        },
+        {
+          "name": "Upcoming Appointments (next 30 days)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/appointments/upcoming?daysAhead=30" }
+        },
+        {
+          "name": "Create Appointment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/pets/{{petId}}/appointments",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Annual Wellness Exam\",\n  \"appointmentDate\": \"2026-08-15T10:30:00\",\n  \"veterinarianName\": \"Dr. Emily Carter\",\n  \"clinicName\": \"Sunrise Animal Clinic\",\n  \"reason\": \"Routine yearly physical\",\n  \"status\": \"SCHEDULED\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 201) {",
+                "  const data = pm.response.json();",
+                "  pm.collectionVariables.set('appointmentId', data.id);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Update Appointment",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/appointments/{{appointmentId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Annual Wellness Exam\",\n  \"appointmentDate\": \"2026-08-16T10:30:00\",\n  \"veterinarianName\": \"Dr. Emily Carter\",\n  \"clinicName\": \"Sunrise Animal Clinic\",\n  \"reason\": \"Rescheduled\",\n  \"status\": \"SCHEDULED\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Appointment Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/appointments/{{appointmentId}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"COMPLETED\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Appointment",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/appointments/{{appointmentId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Expenses",
+      "item": [
+        {
+          "name": "List Expenses For Pet",
+          "request": { "method": "GET", "url": "{{baseUrl}}/pets/{{petId}}/expenses" }
+        },
+        {
+          "name": "List All Expenses",
+          "request": { "method": "GET", "url": "{{baseUrl}}/expenses" }
+        },
+        {
+          "name": "Expense Breakdown By Category",
+          "request": { "method": "GET", "url": "{{baseUrl}}/expenses/breakdown" }
+        },
+        {
+          "name": "Expense Monthly Trend",
+          "request": { "method": "GET", "url": "{{baseUrl}}/expenses/trend?months=6" }
+        },
+        {
+          "name": "Add Expense",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/pets/{{petId}}/expenses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"FOOD\",\n  \"amount\": 45.99,\n  \"expenseDate\": \"2026-07-01\",\n  \"description\": \"Premium dry kibble - 15kg bag\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 201) {",
+                "  const data = pm.response.json();",
+                "  pm.collectionVariables.set('expenseId', data.id);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Update Expense",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/expenses/{{expenseId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"FOOD\",\n  \"amount\": 49.99,\n  \"expenseDate\": \"2026-07-01\",\n  \"description\": \"Updated: premium dry kibble - 15kg bag\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Expense",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/expenses/{{expenseId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "item": [
+        {
+          "name": "List Documents For Pet",
+          "request": { "method": "GET", "url": "{{baseUrl}}/pets/{{petId}}/documents" }
+        },
+        {
+          "name": "List All Documents",
+          "request": { "method": "GET", "url": "{{baseUrl}}/documents" }
+        },
+        {
+          "name": "Upload Document",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/pets/{{petId}}/documents",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [] },
+                { "key": "category", "value": "VACCINATION", "type": "text" },
+                { "key": "description", "value": "Rabies certificate 2026", "type": "text" }
+              ]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 201) {",
+                "  const data = pm.response.json();",
+                "  pm.collectionVariables.set('documentId', data.id);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Delete Document",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/documents/{{documentId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Dashboard Summary",
+          "request": { "method": "GET", "url": "{{baseUrl}}/dashboard/summary" }
+        }
+      ]
+    }
+  ]
+}

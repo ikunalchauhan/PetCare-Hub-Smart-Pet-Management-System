@@ -1,0 +1,39 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: petcare-hub
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/petcare_hub}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:PetCareHubSuperSecretSigningKeyForJWTTokenGeneration2026ChangeMeInProd}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  upload:
+    dir: ${UPLOAD_DIR:uploads}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    com.petcare.hub: INFO
+    org.springframework.security: WARN
