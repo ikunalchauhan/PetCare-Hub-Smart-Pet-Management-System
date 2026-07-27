@@ -9,35 +9,33 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.security.web.util.matcher.PathPatternRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 
+/**
+ * Extracts and validates a JWT bearer token on every request, populating the
+ * SecurityContext when one is present and valid.
+ * <p>
+ * This filter deliberately does <b>not</b> hand-roll any path matching (no
+ * AntPathMatcher, no AntPathRequestMatcher, no PathPatternRequestMatcher).
+ * That responsibility belongs entirely to {@code SecurityConfig}'s
+ * {@code authorizeHttpRequests(...)} rules, which are Spring Security's own
+ * maintained, version-correct mechanism for deciding which paths are public
+ * vs. protected. Keeping path matching in exactly one place avoids the two
+ * engines ever disagreeing about what a given path pattern means.
+ * <p>
+ * Running on every request is safe: with no/invalid token the filter simply
+ * leaves the request unauthenticated and lets it continue — public routes
+ * are already open per the security rules, and protected routes will be
+ * rejected there if authentication is missing.
+ */
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
-
-    /**
-     * Requests matching any of these are skipped by this filter entirely
-     * (login/register, API docs, uploaded files). Built with
-     * PathPatternRequestMatcher — the matching strategy Spring Security 6.3+
-     * recommends in place of the legacy AntPathMatcher/AntPathRequestMatcher,
-     * since it shares the same PathPattern engine Spring MVC uses for routing
-     * and avoids the matching inconsistencies Ant-style matching could allow.
-     */
-    private static final List<RequestMatcher> PUBLIC_MATCHERS = List.of(
-            PathPatternRequestMatcher.withDefaults().matcher("/api/auth/**"),
-            PathPatternRequestMatcher.withDefaults().matcher("/v3/api-docs/**"),
-            PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui/**"),
-            PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui.html"),
-            PathPatternRequestMatcher.withDefaults().matcher("/uploads/**")
-    );
 
     public JwtAuthFilter(JwtUtil jwtUtil, CustomUserDetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;
@@ -45,14 +43,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        return PUBLIC_MATCHERS.stream().anyMatch(matcher -> matcher.matches(request));
-    }
-
-    @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
-                                     @NonNull HttpServletResponse response,
-                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -75,7 +68,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
         } catch (Exception ex) {
             // Invalid/expired token: request proceeds unauthenticated and will be
-            // rejected downstream by Spring Security's access rules.
+            // rejected downstream by Spring Security's access rules if the route
+            // requires authentication.
             SecurityContextHolder.clearContext();
         }
 
